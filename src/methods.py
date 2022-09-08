@@ -204,7 +204,7 @@ class MetaLearningMahalanobis:
 
             idx_avg = idx_avg + 1
 
-            print('one iteration done in ', time.time() - tt)
+            # print('one iteration done in ', time.time() - tt)
 
             # all_meta_parameters_temp.append(curr_meta_parameter)
             # average_meta_parameter = np.mean(all_meta_parameters_temp, axis=0)
