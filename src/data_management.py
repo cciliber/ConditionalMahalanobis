@@ -75,12 +75,13 @@ class DataHandler:
         for cluster_idx in range(number_clusters):
             all_fixed_sparsity[cluster_idx, :] = all_fixed_sparsity_vec[cluster_idx * sparsity:cluster_idx * sparsity + sparsity]
 
-        translation_centroids_weights = 1 * np.ones(self.settings.data.n_dims)
-        radius_weights = 3
+        translation_centroids_weights = 10
+        translation_centroids_weights = translation_centroids_weights * np.ones(self.settings.data.n_dims)
+        sphere_radius_weights = 3
         # translation_centroids_inputs = 1 * np.ones(self.settings.data.n_dims)
         # radius_inputs = 2
 
-        all_centroids_weights = radius_weights * sphere_lattice(self.settings.data.n_dims, number_clusters)
+        all_centroids_weights = sphere_radius_weights * sphere_lattice(self.settings.data.n_dims, number_clusters)
         # all_centroids_inputs = radius_inputs * sphere_lattice(self.settings.data.n_dims, number_clusters)
 
         matrix_w = np.zeros((self.settings.data.n_dims, self.settings.data.n_all_tasks))
@@ -106,6 +107,9 @@ class DataHandler:
             weight_vector[fixed_sparsity] = np.random.randn(sparsity, 1)
             weight_vector = (weight_vector / norm(weight_vector)).ravel()  # * np.random.randint(1, 10)
 
+            single_weight_radius = 0.5
+            weight_vector = single_weight_radius * weight_vector
+            
             weight_vector = weight_vector + centroid_weights  # + np.random.normal(loc=np.zeros(self.settings.data.n_dims),scale=1).ravel()
 
             matrix_w[:, task_idx] = weight_vector
