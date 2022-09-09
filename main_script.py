@@ -13,8 +13,8 @@ from itertools import product
 def main():
 
     # Custom's selection
-    exp = 'exp_synthetic_3_clusters_SMALL'  # Figure 1 left
-    # exp = 'exp_synthetic_3_clusters_LARGE'  # Figure 1 right
+    # exp = 'exp_synthetic_3_clusters_SMALL'  # Figure 1 left
+    exp = 'exp_synthetic_3_clusters_LARGE'  # Figure 1 right
 
     # exp = 'exp_real_lenk'  # Figure 2 left
     # exp = 'exp_real_movies'  # Figure 2 middle
