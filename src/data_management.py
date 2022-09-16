@@ -46,7 +46,9 @@ class DataHandler:
         self.val_task_indexes = None
         self.test_task_indexes = None
 
-        if self.settings.data.dataset == 'synthetic-regression-3-CLUSTERS-SMALL':
+        if self.settings.data.dataset == 'synthetic_feature_CLUSTERS_gen_old_bias_paper':
+            self.synthetic_feature_CLUSTERS_gen_old_bias_paper()
+        elif self.settings.data.dataset == 'synthetic-regression-3-CLUSTERS-SMALL':
             self.synthetic_feature_CLUSTERS_gen()
         elif self.settings.data.dataset == 'synthetic-regression-3-CLUSTERS-LARGE':
             self.synthetic_feature_CLUSTERS_gen()
@@ -58,6 +60,68 @@ class DataHandler:
             self.jester_gen()
         else:
             raise ValueError('Invalid dataset')
+
+    def synthetic_feature_CLUSTERS_gen_old_bias_paper(self):
+
+        number_clusters = 2
+        n_tasks = self.settings.data.n_all_tasks
+        clusters_belonging_indexes = np.random.randint(number_clusters, size=(1, n_tasks))
+
+        translation_centroids_weights = 8
+        zero_centroid = np.zeros((1, self.settings.data.n_dims))
+        other_centroid = translation_centroids_weights * np.ones((1, self.settings.data.n_dims))
+        one_centroid = np.ones((1, self.settings.data.n_dims))
+
+        input_centroids = np.concatenate((-one_centroid, one_centroid), axis=0)
+
+        # put the two centroids as cols of a matrix
+        all_centroids_weights = np.concatenate((zero_centroid, other_centroid), axis=0)
+        matrix_w = np.zeros((self.settings.data.n_dims, self.settings.data.n_all_tasks))
+
+        for task_idx in range(self.settings.data.n_all_tasks):
+
+            cluster_idx = clusters_belonging_indexes[0, task_idx]
+
+            centroid_weights = all_centroids_weights[cluster_idx, :]
+            centroid_features = input_centroids[cluster_idx, :]
+
+            # generate the dataset as a matrix with rows as samples and columns as features
+            # with data generated as a gaussian around the input_centroid
+            features = centroid_features + np.random.normal(0, 1, (self.settings.data.n_all_points, self.settings.data.n_dims))
+
+            # generating and normalizing the weight vectors
+            weight_vector = centroid_weights + np.random.normal(loc=np.zeros(self.settings.data.n_dims),
+                                                                scale=1).ravel()
+
+            matrix_w[:, task_idx] = weight_vector
+
+            # generating labels and adding noise
+            clean_labels = features @ weight_vector
+            signal_to_noise_ratio = 1
+            standard_noise = np.random.randn(self.settings.data.n_all_points)
+            noise_std = np.sqrt(np.var(clean_labels) / (signal_to_noise_ratio * np.var(standard_noise)))
+            noisy_labels = clean_labels + noise_std * standard_noise
+
+            # split into training and test
+            tr_indexes, ts_indexes = train_test_split(np.arange(0, self.settings.data.n_all_points),
+                                                      test_size=self.settings.data.ts_points_pct)
+            features_tr = features[tr_indexes]
+            labels_tr = noisy_labels[tr_indexes]
+            features_ts = features[ts_indexes]
+            labels_ts = noisy_labels[ts_indexes]
+
+            self.features_tr[task_idx] = features_tr
+            self.features_ts[task_idx] = features_ts
+            self.labels_tr[task_idx] = labels_tr
+            self.labels_ts[task_idx] = labels_ts
+
+        self.tr_task_indexes = np.arange(0, self.settings.data.n_tr_tasks)
+        self.val_task_indexes = np.arange(self.settings.data.n_tr_tasks,
+                                          self.settings.data.n_tr_tasks + self.settings.data.n_val_tasks)
+        self.test_task_indexes = np.arange(self.settings.data.n_tr_tasks + self.settings.data.n_val_tasks,
+                                           self.settings.data.n_all_tasks)
+
+
 
     def synthetic_feature_CLUSTERS_gen(self):
 

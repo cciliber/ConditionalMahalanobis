@@ -14,12 +14,29 @@ def main():
 
     # Custom's selection
     # exp = 'exp_synthetic_3_clusters_SMALL'  # Figure 1 left
-    exp = 'exp_synthetic_3_clusters_LARGE'  # Figure 1 right
-
+    # exp = 'exp_synthetic_3_clusters_LARGE'  # Figure 1 right
+    exp = 'synthetic_feature_CLUSTERS_gen_old_bias_paper'
     # exp = 'exp_real_lenk'  # Figure 2 left
     # exp = 'exp_real_movies'  # Figure 2 middle
     # exp = 'exp_real_jester'  # Figure 2 right
 
+    if exp == 'synthetic_feature_CLUSTERS_gen_old_bias_paper':
+        data_settings = {'dataset': 'synthetic_feature_CLUSTERS_gen_old_bias_paper',
+                         'n_tr_tasks': 300,  # 500,
+                         'n_val_tasks': 100,  # 300,
+                         'n_test_tasks': 80,  # 100,
+                         'n_all_points': 20,  # 80,
+                         'ts_points_pct': 0.5,
+                         'n_dims': 20,
+                         }
+        loss_name = 'absolute'
+        feature_map_name_bias = 'linear_with_labels'
+        feature_map_name_feature = 'linear_with_labels'
+        r = None
+        W = None
+        # methods = ['ITL', 'unconditional_Bias', 'conditional_Bias', 'unconditional_Feature', 'conditional_Feature', 'unconditional_Mahalanobis', 'conditional_Mahalanobis']
+        methods = ['ITL', 'unconditional_Bias', 'conditional_Bias']
+        results = {}
     if exp == 'exp_synthetic_3_clusters_SMALL':
         data_settings = {'dataset': 'synthetic-regression-3-CLUSTERS-SMALL',
                          'n_tr_tasks': 200,  # 500,
@@ -128,13 +145,13 @@ def main():
 
             if curr_method == 'ITL':
 
-                lambda_par_range = [1]
+                lambda_par_range = [10 ** i for i in np.linspace(-5, 5, 10)]
                 model = FixedMahalanobis(data, np.zeros(data.features_tr[0].shape[1]), np.eye(data.features_tr[0].shape[1]), lambda_par_range, loss_name)
 
             elif curr_method == 'unconditional_Bias':
 
-                lambda_par_range = [1]
-                gamma_bias_uncond_par_range = [10 ** i for i in np.linspace(-7, 7, 14)]
+                lambda_par_range = [10 ** i for i in np.linspace(-5, 5, 10)]
+                gamma_bias_uncond_par_range = [10 ** i for i in np.linspace(-5, 5, 14)]
                 gamma_bias_cond_par_range = [0]
                 gamma_feature_par_range = [0]
                 # par_range = product(lambda_par_range, gamma_bias_uncond_par_range, gamma_bias_cond_par_range, gamma_feature_uncond_par_range, gamma_feature_cond_par_range)
@@ -165,8 +182,8 @@ def main():
 
             elif curr_method == 'conditional_Bias':
 
-                lambda_par_range = [1]
-                gamma_par_bias_range = [10 ** i for i in np.linspace(-7, 7, 14)]
+                lambda_par_range = [10 ** i for i in np.linspace(-5, 5, 10)]
+                gamma_par_bias_range = [10 ** i for i in np.linspace(-5, 5, 14)]
                 gamma_par_feature_range = [0]
 
                 # par_range = product(lambda_par_range, gamma_bias_uncond_par_range, gamma_bias_cond_par_range, gamma_feature_uncond_par_range, gamma_feature_cond_par_range)
